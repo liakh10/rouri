@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="config.js"></script>
-<script src="pools.js"></script>
+<script src="/config.js"></script>
+<script src="/pools.js"></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Rouri Market · Rouri into any coin. Earn the drip.</title>
-<meta name="description" content="Rouri Market is a concept for a second pool on any coin on Robinhood Chain. Fill both sides, earn the swap fee. Estimates use a real snapshot of Robinhood Chain pools." />
-<link rel="icon" type="image/png" href="assets/img/favicon.png" />
-<link rel="apple-touch-icon" href="assets/img/apple-icon.png" />
+<meta name="description" content="Rouri Market pours liquidity into Uniswap v4 pools for any coin on Robinhood Chain. Fill both sides from your wallet, earn the swap fee, withdraw whenever." />
+<link rel="icon" type="image/png" href="/assets/img/favicon.png" />
+<link rel="apple-touch-icon" href="/assets/img/apple-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Fragment+Mono&display=swap" rel="stylesheet" />
@@ -134,186 +134,362 @@ footer a:hover{color:var(--ink)}
   .pos{grid-template-columns:1fr}
   .tok{grid-template-columns:1fr} .tok dl{grid-template-columns:1fr} .tok .acts{justify-content:flex-start}
   .nav .buy span{display:none}
+  .nav .r{gap:6px} .nav .r .btn.x{display:none} .nav .buy{width:40px;padding:0}
+  #walletBtn{padding:0 12px;font-size:12px}
 }
+
+[hidden]{display:none!important}
+.wal{display:inline-flex;align-items:center;gap:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--up);display:inline-block}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:11.5px}
+.st i{width:7px;height:7px;border-radius:50%;background:var(--line2)}
+.st.ok i{background:var(--up)} .st.off i{background:var(--dn)}
+.f input[type=text]{height:46px;border:1px solid var(--line2);border-radius:14px;background:var(--paper);padding:0 14px;outline:none;width:100%}
+.f input[type=text]:focus{border-color:var(--honey)}
+.steps{display:grid;gap:6px;margin-top:10px}
+.steps div{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
+.steps div.on{color:var(--ink)} .steps div.done{color:var(--up)}
+.steps i{width:9px;height:9px;border-radius:50%;border:1px solid currentColor} .steps div.done i{background:currentColor}
+.warn{margin-top:10px;padding:10px 12px;border:1px solid rgba(184,58,43,.35);border-radius:12px;background:rgba(184,58,43,.06);color:var(--dn);font-size:12px}
+.modal{position:fixed;inset:0;z-index:70;display:none;place-items:center;padding:var(--pad);background:rgba(28,21,13,.4)}
+.modal.on{display:grid}
+.modal .card{width:min(400px,100%)}
+.wbtn{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border:1px solid var(--line2);border-radius:14px;background:var(--paper);margin-top:8px;text-align:left}
+.wbtn img{width:24px;height:24px;border-radius:6px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;z-index:80;background:var(--ink);color:var(--paper);border-radius:14px;padding:11px 16px;font-size:12.5px;max-width:calc(100% - 28px);transition:.2s;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto} .toast.bad{background:var(--dn)}
+.toast a{text-decoration:underline}
+.add{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap} .add input{flex:1;min-width:140px;height:40px;border:1px solid var(--line2);border-radius:999px;background:var(--paper2);padding:0 14px;outline:none}
 </style>
 </head>
 <body>
 <nav class="nav">
   <a class="logo" href="#top"><svg viewBox="0 0 18 24" aria-hidden="true"><defs><radialGradient id="dg" cx=".35" cy=".35" r=".8"><stop offset="0" stop-color="#fff3d6"/><stop offset=".45" stop-color="#f2b84b"/><stop offset="1" stop-color="#9c5406"/></radialGradient></defs><path d="M9 1C9 1 2 10 2 15.5a7 7 0 0 0 14 0C16 10 9 1 9 1Z" fill="url(#dg)"/></svg>Rouri<small>Market</small></a>
   <div class="links"><a href="#pools">Pools</a><a href="#pour">Rouri in</a><a href="#positions">Positions</a><a href="/docs">Docs</a></div>
-  <div class="r"><a class="btn x" data-link="x" href="https://x.com" aria-label="X"><img src="assets/img/x.svg" alt="" /></a><a class="btn go buy" data-link="pons" href="https://www.ponsfamily.com/launchpad"><img src="assets/img/pons.png" alt="" style="filter:invert(1)" /><span>Buy&nbsp;</span><span data-ticker>$ROURI</span></a></div>
+  <div class="r"><button class="btn" id="walletBtn">Connect wallet</button><a class="btn x" data-link="x" href="https://x.com" aria-label="X"><img src="/assets/img/x.svg" alt="" /></a><a class="btn go buy" data-link="pons" href="https://www.ponsfamily.com/launchpad"><img src="/assets/img/pons.png" alt="" style="filter:invert(1)" /><span>Buy&nbsp;</span><span data-ticker>$ROURI</span></a></div>
 </nav>
 
 <main id="top">
   <section class="hero"><div class="in">
     <div>
-      <div class="k">Rouri · Robinhood Chain</div>
+      <div class="k">Rouri · Uniswap v4 · Robinhood Chain</div>
       <h1>Rouri into any coin.<br />Earn the <em>drip</em>.</h1>
-      <p class="lede">A coin on Robinhood Chain gets one pool and its fee already belongs to someone. Rouri is a second pool you fill yourself: both sides in, a cut of every swap out, withdraw whenever.</p>
+      <p class="lede">Pour ETH and a coin into its Uniswap v4 pool from your wallet. Every swap through the pool pays your share of the fee. The position is an NFT you own, collect or withdraw whenever.</p>
       <div class="acts"><a class="btn honey" href="#pour">Rouri in</a><a class="btn" href="#pools">See the pools</a></div>
-      <div class="chips"><span class="chip"><i></i>Pools listed <b id="cPools">—</b></span><span class="chip">ETH <b id="cEth">—</b></span><span class="chip">Fee <b>0.30%</b> · wild <b>1.00%</b></span></div>
+      <div class="chips"><span class="chip"><i></i>Coins <b id="cPools">—</b></span><span class="chip">ETH <b id="cEth">—</b></span><span class="chip">Fee <b>0.30%</b> · wild <b>1.00%</b></span></div>
     </div>
-    <div class="stage"><canvas id="stream" aria-label="Honey pouring into a pool"></canvas><div class="cap">poured this session <b id="poured">$0</b></div></div>
+    <div class="stage"><canvas id="stream" aria-label="Honey pouring into a pool"></canvas><div class="cap">poured through this page <b id="poured">0 ETH</b></div></div>
   </div></section>
 
   <section id="pools"><div class="in">
-    <div class="head"><div><div class="k">Snapshot · 2026-09-13</div><h2>Pools.</h2><p class="lead">Every stock token on Robinhood Chain with the depth of its deepest pool today. The last column is what $1,000 in a second pool would have earned over the past 24 hours, if trades split between pools by depth.</p></div></div>
-    <div class="tscroll"><table><thead><tr><th>Coin</th><th class="n">Price</th><th class="n">24h</th><th class="n">24h volume</th><th class="n">Deepest pool</th><th class="n">$1k earns / day</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+    <div class="head"><div><div class="k">Live from Robinhood Chain</div><h2>Pools.</h2><p class="lead">Stock tokens on Robinhood Chain and their ETH pools on Uniswap v4, read from the chain right now. A pool that does not exist yet opens at the market price when you pour first. A pool whose price has drifted away from the market is marked and closed for pouring.</p></div></div>
+    <div class="tscroll"><table><thead><tr><th>Coin</th><th class="n">Market</th><th class="n">24h</th><th class="n">ETH pool 0.30%</th><th class="n">ETH pool 1.00% wild</th><th></th></tr></thead><tbody id="tb"><tr><td colspan="6" style="color:var(--dim)">Reading pools…</td></tr></tbody></table></div>
   </div></section>
 
   <section id="pour"><div class="in">
-    <div class="head"><div><div class="k">Estimate, then pour</div><h2>Rouri <em>in</em>.</h2><p class="lead">Pick a coin, fill both sides, see what the drip looks like. Everything on this page is a simulation: no wallet, no pool, nothing is poured. Volumes and depths are the real snapshot above.</p></div></div>
+    <div class="head"><div><div class="k">From your wallet</div><h2>Rouri <em>in</em>.</h2><p class="lead">Pick a coin and a tier, set the ETH side. The coin side is matched at the pool price, full range, the way pour.market does it. Your wallet signs up to three transactions: approve the coin, allow the Uniswap position manager through Permit2, pour.</p></div></div>
     <div class="calc">
       <div class="card">
         <div class="f"><label for="fCoin">Coin</label><select id="fCoin"></select></div>
-        <div class="f"><label>Pair with</label><div class="seg" id="fQuote"><button data-q="USDG" class="on">USDG</button><button data-q="ETH">ETH</button></div></div>
-        <div class="f"><label for="fAmt">You pour, USD <b id="fAmtOut"></b></label><input id="fAmt" type="number" min="1" step="10" value="1000" /></div>
-        <div class="f"><label>Fee tier</label><div class="seg" id="fTier"><button data-t="0.003" class="on">0.30%</button><button data-t="0.01">1.00% wild</button></div></div>
-        <div class="f"><label for="fVol">24h volume through the coin, USD</label><input id="fVol" type="number" min="0" step="1000" /></div>
-        <div class="f"><label for="fMove">Coin price moves <b id="fMoveOut">0%</b></label><input id="fMove" type="range" min="-90" max="300" step="1" value="0" /></div>
-        <div class="acts" style="margin-top:6px"><button class="btn go" id="fGo">Rouri it · simulated</button></div>
+        <div class="f" id="fCustomRow" hidden><label for="fCustom">Coin contract</label><input id="fCustom" type="text" placeholder="0x…" autocomplete="off" /></div>
+        <div class="f"><label>Fee tier</label><div class="seg" id="fTier"><button data-t="standard" class="on">0.30%</button><button data-t="wild">1.00% wild</button></div></div>
+        <div class="f"><label for="fEth">ETH side <b id="fEthBal"></b></label><input id="fEth" type="number" min="0" step="0.001" value="0.01" /></div>
+        <div class="f"><label>Slippage</label><div class="seg" id="fSlip"><button data-s="50" class="on">0.5%</button><button data-s="100">1%</button><button data-s="300">3%</button></div></div>
+        <div class="acts" style="margin-top:6px"><button class="btn go" id="fGo">Rouri in</button></div>
+        <div class="steps" id="fSteps" hidden></div>
         <div class="status" id="fStatus"></div>
       </div>
       <div class="card res">
-        <div class="k">Your drip per day</div>
-        <div class="big" id="rDay">$0<small>/ day</small></div>
+        <div class="k">You pour</div>
+        <div class="big" id="rDep">—</div>
         <div class="rows">
-          <div><span>You deposit</span><b id="rDep">—</b></div>
-          <div><span>Existing depth</span><b id="rLiq">—</b></div>
-          <div><span>Your share of volume</span><b id="rShare">—</b></div>
-          <div><span>30 days</span><b id="rMonth">—</b></div>
-          <div><span>Yearly, if nothing changes</span><b id="rApr">—</b></div>
-          <div><span>If the price moves</span><b id="rIl">—</b></div>
+          <div><span>Pool</span><b id="rPool">—</b></div>
+          <div><span>Pool price</span><b id="rPrice">—</b></div>
+          <div><span>Market price</span><b id="rMarket">—</b></div>
+          <div><span>Your share of active liquidity</span><b id="rShare">—</b></div>
+          <div><span>Your coin balance</span><b id="rBal">—</b></div>
         </div>
-        <p class="note">share = your depth ÷ (pool depth + your depth). fee per day = 24h volume × tier × share. Price move compares your position with simply holding both sides, the usual impermanent loss: 2√r ÷ (1 + r) − 1. A 1.00% pool only earns if trades are routed to it, the estimate assumes they are.</p>
+        <div class="warn" id="rWarn" hidden></div>
+        <p class="note">Full range: the position earns on every trade at any price. Fees accrue inside the position and are paid out when you collect or withdraw. Price moves change the mix of ETH and coin you get back, the usual impermanent loss.</p>
       </div>
     </div>
   </div></section>
 
   <section id="positions"><div class="in">
-    <div class="head"><div><div class="k">In this browser</div><h2>Positions.</h2><p class="lead">What you poured on this page, with fees ticking at the estimated rate. Collect sends the drip to your total, withdraw removes the position. Simulated, stored locally.</p></div><span class="chip">collected <b id="pTotal">$0.00</b></span></div>
-    <div class="pos" id="pos"></div>
+    <div class="head"><div><div class="k">Your wallet</div><h2>Positions.</h2><p class="lead">Uniswap v4 positions poured through Rouri or added by id. Fees and amounts are read live from the pool.</p></div><button class="btn" id="pRefresh">Refresh</button></div>
+    <div class="pos" id="pos"><div class="empty">Connect a wallet to see your positions.</div></div>
+    <div class="add"><input id="pAddId" inputmode="numeric" placeholder="Add a position by id" /><button class="btn" id="pAdd">Add</button></div>
   </div></section>
 
   <section id="token"><div class="in">
     <div class="head"><div><div class="k">The coin itself</div><h2><span data-ticker>$ROURI</span>.</h2></div></div>
     <div class="tok" id="tok" title="Copy contract">
       <div><dl><dt>Name</dt><dd data-name>Rouri Market</dd><dt>Ticker</dt><dd data-ticker>$ROURI</dd><dt>Chain</dt><dd>Robinhood Chain · Pons</dd><dt>Contract</dt><dd class="ca" id="ca">soon</dd></dl><div class="cp" id="cp">[ COPY ]</div></div>
-      <div class="acts"><a class="btn honey" data-link="pons" href="https://www.ponsfamily.com/launchpad"><img src="assets/img/pons.png" alt="" />Buy on Pons</a><a class="btn" data-link="dex" href="https://dexscreener.com/robinhood">Chart</a><a class="btn x" data-link="x" href="https://x.com" aria-label="X"><img src="assets/img/x.svg" alt="" style="filter:invert(1)" /></a></div>
+      <div class="acts"><a class="btn honey" data-link="pons" href="https://www.ponsfamily.com/launchpad"><img src="/assets/img/pons.png" alt="" style="filter:brightness(0)" />Buy on Pons</a><a class="btn" data-link="dex" href="https://dexscreener.com/robinhood">Chart</a><a class="btn x" data-link="x" href="https://x.com" aria-label="X"><img src="/assets/img/x.svg" alt="" style="filter:invert(1)" /></a></div>
     </div>
   </div></section>
 </main>
 
-<footer><span><span data-name>Rouri Market</span> · Robinhood Chain · snapshot 2026-09-13</span><nav><a href="/docs">Docs</a><a data-link="x" href="https://x.com">X</a><a href="#pour">Rouri in</a></nav></footer>
+<footer><span><span data-name>Rouri Market</span> · Uniswap v4 · Robinhood Chain</span><nav><a href="/docs">Docs</a><a data-link="x" href="https://x.com">X</a><a href="#pour">Rouri in</a></nav></footer>
+<div class="modal" id="wm"><div class="card"><div class="head" style="margin:0"><b class="serif" style="font-size:28px">Connect a wallet</b><button class="btn x" id="wmX">✕</button></div><p class="note">Robinhood Chain is added to your wallet if it is missing</p><div id="wlist"></div></div></div>
+<div class="toast" id="toast"></div>
 
-<script>
-(function(){
-  var S = window.SITE, CA = (S.CA || "SOON").trim(), HAS = CA !== "SOON" && CA !== "";
-  document.querySelectorAll('[data-name]').forEach(function(e){ e.textContent = S.NAME; });
-  document.querySelectorAll('[data-ticker]').forEach(function(e){ e.textContent = S.TICKER; });
-  document.querySelectorAll('[data-link="pons"]').forEach(function(a){ a.href = HAS ? window.PONS_HOME + '/' + CA : window.PONS_HOME; a.target = '_blank'; a.rel = 'noopener'; });
-  document.querySelectorAll('[data-link="dex"]').forEach(function(a){ a.href = HAS ? window.DEX_HOME + '/' + CA : window.DEX_HOME; a.target = '_blank'; a.rel = 'noopener'; });
-  document.querySelectorAll('[data-link="x"]').forEach(function(a){ a.href = S.X_URL || 'https://x.com'; a.target = '_blank'; a.rel = 'noopener'; });
-  var caEl = document.getElementById('ca'), cp = document.getElementById('cp'); caEl.textContent = HAS ? CA : 'soon';
-  document.getElementById('tok').addEventListener('click', function(e){ if(e.target.closest('a')) return; if(HAS){ if(navigator.clipboard) navigator.clipboard.writeText(CA); cp.textContent = '[ COPIED ]'; } else cp.textContent = '[ NOT YET ]'; setTimeout(function(){ cp.textContent = '[ COPY ]'; }, 1300); });
+<script type="module">
+import * as W from '/lib/wallet.js';
+import * as V from '/lib/v4.js';
+import * as viem from 'https://cdn.jsdelivr.net/npm/viem@2.21.55/+esm';
+const { erc20Abi, formatUnits, formatEther, parseEther, maxUint256, getAddress } = viem;
+const X = V.makeV4(viem);
+const S = window.SITE, CA = (S.CA || 'SOON').trim(), HAS = CA !== 'SOON' && CA !== '';
+const $ = id => document.getElementById(id);
+document.querySelectorAll('[data-name]').forEach(e => e.textContent = S.NAME);
+document.querySelectorAll('[data-ticker]').forEach(e => e.textContent = S.TICKER);
+document.querySelectorAll('[data-link="pons"]').forEach(a => { a.href = HAS ? window.PONS_HOME + '/' + CA : window.PONS_HOME; a.target = '_blank'; a.rel = 'noopener'; });
+document.querySelectorAll('[data-link="dex"]').forEach(a => { a.href = HAS ? window.DEX_HOME + '/' + CA : window.DEX_HOME; a.target = '_blank'; a.rel = 'noopener'; });
+document.querySelectorAll('[data-link="x"]').forEach(a => { a.href = S.X_URL || 'https://x.com'; a.target = '_blank'; a.rel = 'noopener'; });
+$('ca').textContent = HAS ? CA : 'soon';
+$('tok').addEventListener('click', e => { if (e.target.closest('a')) return; const cp = $('cp'); if (HAS) { navigator.clipboard && navigator.clipboard.writeText(CA); cp.textContent = '[ COPIED ]'; } else cp.textContent = '[ NOT YET ]'; setTimeout(() => cp.textContent = '[ COPY ]', 1300); });
 
-  var POOLS = window.POOLS || [], ETH = window.ETH_USD || 0, byT = {};
-  POOLS.forEach(function(p){ byT[p.t] = p; });
-  function usd(v, d){ if(v >= 1e6) return '$' + (v / 1e6).toFixed(2) + 'M'; if(v >= 1e4) return '$' + Math.round(v / 1e3) + 'k'; if(v >= 100) return '$' + Math.round(v).toLocaleString('en-US'); return '$' + v.toFixed(d == null ? 2 : d); }
-  function share(d, liq){ return d / (liq + d); }
-  document.getElementById('cPools').textContent = POOLS.length;
-  document.getElementById('cEth').textContent = ETH ? '$' + Math.round(ETH).toLocaleString('en-US') : '—';
+const COINS = (window.POOLS || []).map(p => ({ t: p.t, name: p.name, addr: getAddress(p.addr), usd: p.price, ch: p.ch, decimals: 18 }));
+const ST = { eth: 0, pools: {}, w: W.state(), tier: 'standard', slip: 50n, poured: 0 };
+const DRIFT = 0.25; /* pools more than 25% away from the market are closed for pouring */
+const fmt = (n, d = 2) => Number(n).toLocaleString('en-US', { maximumFractionDigits: d });
+const usd = n => !isFinite(n) ? '—' : '$' + (n >= 1e6 ? fmt(n / 1e6, 2) + 'M' : n >= 1e3 ? fmt(n, 0) : fmt(n, n < 1 ? 4 : 2));
+const txa = h => `<a href="${W.explorer('tx', h)}" target="_blank" rel="noopener">tx ↗</a>`;
+const walletError = e => e && (e.code === 4001 || /rejected|denied|cancel/i.test(e.shortMessage || e.message || '')) ? 'Cancelled in wallet.' : String((e && (e.shortMessage || e.message)) || 'Something went wrong.').slice(0, 200);
+function toast(t, bad, ms = 4000) { const el = $('toast'); el.innerHTML = t; el.className = 'toast on' + (bad ? ' bad' : ''); clearTimeout(toast.h); toast.h = setTimeout(() => el.className = 'toast', ms); }
+const multicall = contracts => W.pub.multicall({ contracts, allowFailure: true, multicallAddress: V.ADDR.multicall3 });
 
-  /* pools table */
-  document.getElementById('tb').innerHTML = POOLS.map(function(p){
-    var k = p.vol * 0.003 * share(1000, p.liq);
-    return '<tr><td><div class="coin"><div class="mono">' + p.t.slice(0, 3) + '</div><div><b>' + p.t + '</b><span>' + p.name + '</span></div></div></td><td class="n">$' + p.price.toLocaleString('en-US', { maximumFractionDigits: 2 }) + '</td><td class="n ' + (p.ch >= 0 ? 'up' : 'dn') + '">' + (p.ch >= 0 ? '+' : '') + p.ch.toFixed(2) + '%</td><td class="n">' + usd(p.vol) + '</td><td class="n">' + usd(p.liq) + '</td><td class="n earn">' + usd(k) + '</td><td class="n"><button class="btn mini" data-t="' + p.t + '">Rouri in →</button></td></tr>';
-  }).join('');
-  document.getElementById('tb').addEventListener('click', function(e){ var b = e.target.closest('button[data-t]'); if(!b) return; fCoin.value = b.dataset.t; coinChanged(); document.getElementById('pour').scrollIntoView({ behavior: 'smooth' }); });
+/* prices */
+async function ethPrice() { try { const j = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd').then(r => r.json()); ST.eth = j.ethereum.usd; } catch { ST.eth = ST.eth || 0; } $('cEth').textContent = ST.eth ? '$' + fmt(ST.eth, 0) : '—'; }
 
-  /* calculator */
-  var fCoin = document.getElementById('fCoin'), fAmt = document.getElementById('fAmt'), fVol = document.getElementById('fVol'), fMove = document.getElementById('fMove'), quote = 'USDG', tier = 0.003;
-  fCoin.innerHTML = POOLS.map(function(p){ return '<option value="' + p.t + '">' + p.t + ' · ' + p.name + '</option>'; }).join('');
-  function seg(id, attr, cb){ var el = document.getElementById(id); el.addEventListener('click', function(e){ var b = e.target.closest('button'); if(!b) return; el.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x === b); }); cb(b.dataset[attr]); calc(); }); }
-  seg('fQuote', 'q', function(v){ quote = v; });
-  seg('fTier', 't', function(v){ tier = parseFloat(v); });
-  function coinChanged(){ var p = byT[fCoin.value]; if(p) fVol.value = Math.round(p.vol); calc(); }
-  fCoin.addEventListener('change', coinChanged);
-  [fAmt, fVol, fMove].forEach(function(i){ i.addEventListener('input', calc); });
-  var last = null;
-  function calc(){
-    var p = byT[fCoin.value]; if(!p) return;
-    var d = Math.max(0, parseFloat(fAmt.value) || 0), vol = Math.max(0, parseFloat(fVol.value) || 0), sh = share(d, p.liq), day = vol * tier * sh, m = parseInt(fMove.value, 10) / 100, r = 1 + m, il = 2 * Math.sqrt(r) / (1 + r) - 1;
-    var coinAmt = d / 2 / p.price, qAmt = quote === 'ETH' ? (ETH ? d / 2 / ETH : 0) : d / 2;
-    document.getElementById('fAmtOut').textContent = d ? '≈ ' + coinAmt.toFixed(coinAmt < 1 ? 4 : 2) + ' ' + p.t + ' + ' + (quote === 'ETH' ? qAmt.toFixed(4) + ' ETH' : qAmt.toFixed(2) + ' USDG') : '';
-    document.getElementById('rDay').innerHTML = usd(day) + '<small>/ day</small>';
-    document.getElementById('rDep').textContent = coinAmt.toFixed(coinAmt < 1 ? 4 : 2) + ' ' + p.t + ' + ' + (quote === 'ETH' ? qAmt.toFixed(4) + ' ETH' : qAmt.toFixed(2) + ' USDG');
-    document.getElementById('rLiq').textContent = usd(p.liq) + ' in the ' + p.t + '/' + p.quote + ' pool';
-    document.getElementById('rShare').textContent = (sh * 100).toFixed(sh < .001 ? 4 : 2) + '%';
-    document.getElementById('rMonth').textContent = usd(day * 30);
-    document.getElementById('rApr').textContent = d ? (day * 365 / d * 100).toFixed(1) + '% · ' + usd(day * 365) : '—';
-    document.getElementById('fMoveOut').textContent = (m >= 0 ? '+' : '') + Math.round(m * 100) + '%';
-    document.getElementById('rIl').innerHTML = m === 0 ? 'no change' : '<span class="dn">' + (il * 100).toFixed(2) + '%</span> vs holding';
-    last = { t: p.t, quote: quote, d: d, tier: tier, day: day };
+/* pools */
+async function readPools(coins) {
+  const calls = [];
+  for (const c of coins) for (const tier of ['standard', 'wild']) { const id = X.poolId(X.poolKey(c.addr, tier)); calls.push({ address: V.ADDR.stateView, abi: X.SV_ABI, functionName: 'getSlot0', args: [id] }, { address: V.ADDR.stateView, abi: X.SV_ABI, functionName: 'getLiquidity', args: [id] }); }
+  const r = await multicall(calls);
+  coins.forEach((c, i) => ['standard', 'wild'].forEach((tier, j) => {
+    const k = (i * 2 + j) * 2, slot = r[k].result, L = r[k + 1].result || 0n;
+    const sqrtP = slot ? slot[0] : 0n, exists = sqrtP > 0n;
+    const ethPer = exists ? V.ethPerToken(sqrtP) : 0, poolUsd = ethPer * ST.eth;
+    const drift = exists && c.usd && ST.eth ? Math.abs(poolUsd / c.usd - 1) : 0;
+    const depthEth = exists && L > 0n ? Number(formatEther(2n * L * V.Q96 / sqrtP)) : 0;
+    ST.pools[c.addr + ':' + tier] = { exists, sqrtP, L, ethPer, poolUsd, drift, depthEth, broken: exists && (L === 0n || drift > DRIFT) };
+  }));
+}
+function poolCell(c, tier) {
+  const p = ST.pools[c.addr + ':' + tier]; if (!p) return '—';
+  if (!p.exists) return '<span class="st"><i></i>not open yet</span>';
+  if (p.broken) return `<span class="st off"><i></i>${p.L === 0n ? 'empty' : 'off market ' + fmt(p.drift * 100, 0) + '%'}</span>`;
+  return `<span class="st ok"><i></i>${usd(p.poolUsd)} · depth ${usd(p.depthEth * ST.eth)}</span>`;
+}
+function paintPools() {
+  $('cPools').textContent = COINS.length;
+  $('tb').innerHTML = COINS.map(c => `<tr><td><div class="coin"><div class="mono">${c.t.slice(0, 3)}</div><div><b>${c.t}</b><span>${c.name}</span></div></div></td><td class="n">${usd(c.usd)}</td><td class="n ${c.ch >= 0 ? 'up' : 'dn'}">${c.ch >= 0 ? '+' : ''}${c.ch.toFixed(2)}%</td><td class="n">${poolCell(c, 'standard')}</td><td class="n">${poolCell(c, 'wild')}</td><td class="n"><button class="btn mini" data-t="${c.t}">Rouri in →</button></td></tr>`).join('');
+}
+$('tb').addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (!b) return; $('fCoin').value = b.dataset.t; const c = COINS.find(x => x.t === b.dataset.t); const std = ST.pools[c.addr + ':standard'], wild = ST.pools[c.addr + ':wild']; if (std && std.broken && wild && !wild.broken) setTier('wild'); coinChanged(); $('pour').scrollIntoView({ behavior: 'smooth' }); });
+
+/* pour form */
+$('fCoin').innerHTML = COINS.map(c => `<option value="${c.t}">${c.t} · ${c.name}</option>`).join('') + '<option value="custom">Another coin by contract…</option>';
+function setTier(t) { ST.tier = t; $('fTier').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); }
+$('fTier').onclick = e => { const b = e.target.closest('button'); if (b) { setTier(b.dataset.t); quote(); } };
+$('fSlip').onclick = e => { const b = e.target.closest('button'); if (!b) return; ST.slip = BigInt(b.dataset.s); $('fSlip').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); quote(); };
+let custom = null;
+async function coinChanged() {
+  $('fCustomRow').hidden = $('fCoin').value !== 'custom';
+  if ($('fCoin').value === 'custom') {
+    const a = $('fCustom').value.trim();
+    custom = null;
+    if (/^0x[0-9a-fA-F]{40}$/.test(a)) {
+      try { const [sym, name, dec] = await Promise.all(['symbol', 'name', 'decimals'].map(f => W.pub.readContract({ address: a, abi: erc20Abi, functionName: f }))); custom = { t: sym, name, addr: getAddress(a), usd: 0, ch: 0, decimals: dec }; await readPools([custom]); } catch { custom = null; }
+    }
   }
-  coinChanged();
+  quote();
+}
+$('fCoin').onchange = coinChanged; $('fCustom').oninput = coinChanged; $('fEth').oninput = () => quote();
+const coin = () => $('fCoin').value === 'custom' ? custom : COINS.find(c => c.t === $('fCoin').value);
 
-  /* positions */
-  var KEY = 'rouri:positions', TKEY = 'rouri:collected', pos = [], collected = 0, poured = 0;
-  try{ pos = JSON.parse(localStorage.getItem(KEY) || '[]'); collected = parseFloat(localStorage.getItem(TKEY) || '0') || 0; }catch(e){}
-  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(pos)); localStorage.setItem(TKEY, String(collected)); }catch(e){} }
-  var posEl = document.getElementById('pos'), pTotal = document.getElementById('pTotal');
-  function earned(x){ return x.day / 86400 * Math.max(0, (Date.now() - x.since) / 1000); }
-  function renderPos(){
-    pTotal.textContent = '$' + collected.toFixed(4);
-    if(!pos.length){ posEl.innerHTML = '<div class="empty">Nothing poured in this browser yet. <a href="#pour" style="color:var(--deep)">Rouri in</a> and your position shows up here.</div>'; return; }
-    posEl.innerHTML = pos.map(function(x, i){ return '<div class="pcard" data-i="' + i + '"><div class="top"><div class="mono">' + x.t.slice(0, 3) + '</div><div><b>' + x.t + '/' + x.quote + '</b><span>' + usd(x.d) + ' · ' + (x.tier * 100).toFixed(2) + '% tier</span></div><span class="tag">simulated</span></div><div class="earned" data-e="' + i + '">$0.0000<small>uncollected · ' + usd(x.day) + ' / day</small></div><div class="acts"><button class="btn honey" data-a="collect">Collect</button><button class="btn" data-a="withdraw">Withdraw</button></div></div>'; }).join('');
-    tickPos();
+let plan = null, qSeq = 0;
+async function quote() {
+  const seq = ++qSeq, c = coin(); plan = null; $('rWarn').hidden = true;
+  if (!c) { $('rDep').textContent = '—'; $('rPool').textContent = $('fCoin').value === 'custom' ? 'paste a coin contract' : '—'; return; }
+  const tier = ST.tier, p = ST.pools[c.addr + ':' + tier], { tickLower, tickUpper } = V.fullRange(V.TIERS[tier].tickSpacing);
+  let ethIn; try { ethIn = parseEther(String($('fEth').value || '0')); } catch { ethIn = 0n; }
+  const dec = c.decimals || 18;
+  $('rPool').textContent = `${c.t}/ETH · ${V.TIERS[tier].label} · ${p && p.exists ? 'open' : 'opens with your pour'}`;
+  $('rMarket').textContent = c.usd ? usd(c.usd) + (ST.eth ? ' · ' + fmt(c.usd / ST.eth, 6) + ' ETH' : '') : 'unknown';
+  let sqrtP, init = null, warn = null;
+  if (p && p.exists) {
+    sqrtP = p.sqrtP; $('rPrice').textContent = usd(p.poolUsd) + ' · ' + fmt(p.ethPer, 6) + ' ETH';
+    if (p.broken) warn = p.L === 0n ? 'This pool exists but holds no liquidity and its price sits at the edge of the range. Pour into the other tier.' : `This pool trades ${fmt(p.drift * 100, 0)}% away from the market. Pouring here would hand arbitrageurs your coins. Pick the other tier.`;
+  } else {
+    if (!c.usd || !ST.eth) warn = 'No market price for this coin, so a new pool cannot be opened safely here.';
+    else { const ethPerToken = c.usd / ST.eth, oneToken = 10n ** BigInt(dec), ethForOne = parseEther(ethPerToken.toFixed(18)); sqrtP = V.sqrtFromAmounts(ethForOne, oneToken); init = sqrtP; $('rPrice').textContent = 'opens at ' + usd(c.usd) + ' · ' + fmt(ethPerToken, 6) + ' ETH'; }
   }
-  function tickPos(){ pos.forEach(function(x, i){ var el = posEl.querySelector('[data-e="' + i + '"]'); if(el) el.firstChild.nodeValue = '$' + earned(x).toFixed(4); }); }
-  setInterval(tickPos, 250);
-  posEl.addEventListener('click', function(e){ var b = e.target.closest('button[data-a]'); if(!b) return; var i = +b.closest('.pcard').dataset.i, x = pos[i]; if(!x) return;
-    collected += earned(x);
-    if(b.dataset.a === 'collect'){ x.since = Date.now(); } else { pos.splice(i, 1); }
-    save(); renderPos(); drip(b.dataset.a === 'collect' ? .5 : .2);
-  });
-  document.getElementById('fGo').addEventListener('click', function(){ if(!last || !last.d) return; pos.push({ t: last.t, quote: last.quote, d: last.d, tier: last.tier, day: last.day, since: Date.now() }); save(); renderPos(); poured += last.d; document.getElementById('poured').textContent = usd(poured, 0); document.getElementById('fStatus').textContent = usd(last.d, 0) + ' poured into ' + last.t + '/' + last.quote + '. Simulated.'; drip(1); });
-  renderPos();
+  if (warn) { $('rWarn').textContent = warn; $('rWarn').hidden = false; $('rDep').textContent = '—'; $('rShare').textContent = '—'; return; }
+  if (ethIn <= 0n) { $('rDep').textContent = '—'; return; }
+  const sA = V.sqrtAtTick(tickLower), sB = V.sqrtAtTick(tickUpper);
+  const L = V.liquidityForAmounts(sqrtP, sA, sB, ethIn, (1n << 200n));
+  const need = V.amountsForLiquidity(sqrtP, sA, sB, L);
+  const bps = 10000n + ST.slip;
+  plan = { c, tier, key: X.poolKey(c.addr, tier), tickLower, tickUpper, L, need, init, amount0Max: need.amount0 * bps / 10000n + 1n, amount1Max: need.amount1 * bps / 10000n + 1n };
+  $('rDep').innerHTML = `${fmt(formatEther(need.amount0), 5)}<small>ETH</small> + ${fmt(formatUnits(need.amount1, dec), 4)}<small>${c.t}</small>`;
+  const poolL = p && p.exists ? p.L : 0n;
+  $('rShare').textContent = poolL > 0n ? fmt(Number(L * 1000000n / (poolL + L)) / 10000, 4) + '%' : '100% of a new pool';
+  if (ST.w.address) {
+    const bal = await W.pub.readContract({ address: c.addr, abi: erc20Abi, functionName: 'balanceOf', args: [ST.w.address] }).catch(() => 0n);
+    if (seq !== qSeq) return;
+    plan.balance = bal;
+    $('rBal').innerHTML = fmt(formatUnits(bal, dec), 4) + ' ' + c.t + (bal < plan.amount1Max ? ' · <span class="dn">not enough</span>' : '');
+  } else $('rBal').textContent = 'connect a wallet';
+}
 
-  /* the pour: honey stream into a pool */
-  var cv = document.getElementById('stream'), ctx = cv.getContext('2d'), dpr = 1, W = 0, H = 0, boost = 0, ripples = [], drops = [], lastT = performance.now(), rip = 0, level = 0;
-  var RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function drip(n){ boost = Math.min(1.4, boost + n); level = Math.min(1, level + n * .08); }
-  function size(){ dpr = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth || 500; H = cv.clientHeight || 500; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-  function frame(now){
-    var dt = Math.min(.05, (now - lastT) / 1000); lastT = now; if(RM) dt *= .3;
-    var t = now / 1000, cx = W * .5, py = H * (.78 - level * .04), rx = Math.min(W * .42, 260), ry = rx * .2;
-    boost = Math.max(0, boost - dt * .35);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-    /* shadow + pool */
-    ctx.fillStyle = 'rgba(80,45,10,.12)'; ctx.beginPath(); ctx.ellipse(cx, py + ry * .9, rx * 1.04, ry * .7, 0, 0, 6.283); ctx.fill();
-    var pg = ctx.createRadialGradient(cx - rx * .25, py - ry * .4, 4, cx, py, rx); pg.addColorStop(0, '#fff0c9'); pg.addColorStop(.25, '#f2b84b'); pg.addColorStop(.8, '#d98410'); pg.addColorStop(1, '#9c5406');
-    ctx.fillStyle = pg; ctx.beginPath(); ctx.ellipse(cx, py, rx, ry, 0, 0, 6.283); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,244,220,.55)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(cx, py, rx, ry, 0, 3.3, 5.9); ctx.stroke();
-    /* ripples */
-    rip -= dt; if(rip <= 0){ ripples.push({ r: .06, a: .7 }); rip = .55 - boost * .25; }
-    for(var i = ripples.length - 1; i >= 0; i--){ var R = ripples[i]; R.r += dt * (.32 + boost * .2); R.a -= dt * .55; if(R.a <= 0 || R.r > .98){ ripples.splice(i, 1); continue; }
-      ctx.strokeStyle = 'rgba(255,245,222,' + (R.a * .8).toFixed(3) + ')'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.ellipse(cx, py, rx * R.r, ry * R.r, 0, 0, 6.283); ctx.stroke(); }
-    /* stream */
-    var w0 = 7 + boost * 9 + Math.sin(t * 3.1) * .8, steps = 40, L = [], Rr = [];
-    for(var s = 0; s <= steps; s++){ var y = -10 + (py + 10) * s / steps, k = s / steps, wob = Math.sin(y * .02 - t * 5) * (1.2 + boost) * k, w = w0 * (.55 + .45 * k); L.push([cx + wob - w / 2, y]); Rr.unshift([cx + wob + w / 2, y]); }
-    var sg = ctx.createLinearGradient(cx - w0, 0, cx + w0, 0); sg.addColorStop(0, '#a95c08'); sg.addColorStop(.35, '#f7c867'); sg.addColorStop(.55, '#fff0c9'); sg.addColorStop(1, '#b8680c');
-    ctx.fillStyle = sg; ctx.beginPath(); L.concat(Rr).forEach(function(q, j){ j ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); ctx.closePath(); ctx.fill();
-    /* impact */
-    ctx.fillStyle = 'rgba(255,240,201,.9)'; ctx.beginPath(); ctx.ellipse(cx, py, w0 * 1.3, w0 * .35, 0, 0, 6.283); ctx.fill();
-    if(Math.random() < dt * (3 + boost * 30)) for(var n = 0; n < 1 + Math.floor(boost * 3); n++) drops.push({ x: cx + (Math.random() - .5) * w0, y: py, vx: (Math.random() - .5) * 70, vy: -60 - Math.random() * 90 * (1 + boost), r: 1.4 + Math.random() * 2.2 });
-    for(var d = drops.length - 1; d >= 0; d--){ var D = drops[d]; D.vy += 320 * dt; D.x += D.vx * dt; D.y += D.vy * dt; if(D.y > py && D.vy > 0){ drops.splice(d, 1); continue; }
-      ctx.fillStyle = '#e3931b'; ctx.beginPath(); ctx.arc(D.x, D.y, D.r, 0, 6.283); ctx.fill(); ctx.fillStyle = 'rgba(255,243,214,.9)'; ctx.beginPath(); ctx.arc(D.x - D.r * .3, D.y - D.r * .3, D.r * .35, 0, 6.283); ctx.fill(); }
-    requestAnimationFrame(frame);
+function steps(list, active) { $('fSteps').hidden = false; $('fSteps').innerHTML = list.map((l, i) => `<div class="${i < active ? 'done' : i === active ? 'on' : ''}"><i></i>${l}</div>`).join(''); }
+let pouring = false;
+$('fGo').onclick = async () => {
+  if (pouring) return;
+  try {
+    if (!ST.w.address) { openWallets(); return; }
+    if (!ST.w.onChain) await W.switchChain();
+    await quote(); if (!plan) throw Error($('rWarn').hidden ? 'Enter the ETH side.' : $('rWarn').textContent);
+    if (plan.balance < plan.amount1Max) throw Error('Not enough ' + plan.c.t + ' in this wallet.');
+    pouring = true; $('fGo').disabled = true;
+    const user = ST.w.address, token = plan.c.addr, L = ['Approve ' + plan.c.t, 'Allow Uniswap through Permit2', 'Pour'];
+    steps(L, 0);
+    const allowance = await W.pub.readContract({ address: token, abi: erc20Abi, functionName: 'allowance', args: [user, V.ADDR.permit2] });
+    if (allowance < plan.amount1Max) { const tx = await W.send({ address: token, abi: erc20Abi, functionName: 'approve', args: [V.ADDR.permit2, maxUint256] }); toast('Approving · ' + txa(tx.hash), false, 30000); await tx.wait(); }
+    steps(L, 1);
+    const [amt, exp] = await W.pub.readContract({ address: V.ADDR.permit2, abi: X.PERMIT2_ABI, functionName: 'allowance', args: [user, token, V.ADDR.positionManager] });
+    if (amt < plan.amount1Max || Number(exp) < Date.now() / 1000 + 3600) { const tx = await W.send({ address: V.ADDR.permit2, abi: X.PERMIT2_ABI, functionName: 'approve', args: [token, V.ADDR.positionManager, (1n << 160n) - 1n, 281474976710655n] }); toast('Permit2 · ' + txa(tx.hash), false, 30000); await tx.wait(); }
+    steps(L, 2);
+    const m = X.mintCalldata({ key: plan.key, tickLower: plan.tickLower, tickUpper: plan.tickUpper, liquidity: plan.L, amount0Max: plan.amount0Max, amount1Max: plan.amount1Max, owner: user, init: plan.init });
+    const tx = await W.sendRaw({ to: V.ADDR.positionManager, data: m.data, value: m.value });
+    toast('Pouring · ' + txa(tx.hash), false, 60000);
+    const rc = await tx.wait(); if (rc.status !== 'success') throw Error('The pour reverted.');
+    steps(L, 3);
+    await fetch('/api/positions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tx: tx.hash }) }).catch(() => {});
+    ST.poured += Number(formatEther(plan.need.amount0)); $('poured').textContent = fmt(ST.poured, 4) + ' ETH';
+    $('fStatus').innerHTML = 'Poured into ' + plan.c.t + '/ETH ' + V.TIERS[plan.tier].label + ' · ' + txa(tx.hash);
+    toast('Poured. Your position is below · ' + txa(tx.hash), false, 7000); drip(1.2);
+    await readPools([plan.c]); paintPools(); quote(); loadPositions();
+  } catch (e) { toast(walletError(e), true, 7000); }
+  finally { pouring = false; $('fGo').disabled = false; }
+};
+
+/* positions */
+async function loadPositions() {
+  const el = $('pos');
+  if (!ST.w.address) { el.innerHTML = '<div class="empty">Connect a wallet to see your positions.</div>'; return; }
+  let ids = [];
+  try { ids = (await fetch('/api/positions?owner=' + ST.w.address, { cache: 'no-store' }).then(r => r.json())).ids || []; } catch {}
+  if (!ids.length) { el.innerHTML = '<div class="empty">No positions yet. <a href="#pour" style="color:var(--deep)">Rouri in</a> and yours shows up here.</div>'; return; }
+  const infos = await multicall(ids.flatMap(id => [{ address: V.ADDR.positionManager, abi: X.PM_ABI, functionName: 'getPoolAndPositionInfo', args: [BigInt(id)] }, { address: V.ADDR.positionManager, abi: X.PM_ABI, functionName: 'getPositionLiquidity', args: [BigInt(id)] }]));
+  const cards = [];
+  for (let i = 0; i < ids.length; i++) {
+    const pi = infos[i * 2].result, L = infos[i * 2 + 1].result || 0n; if (!pi) continue;
+    const [key, info] = pi, { tickLower, tickUpper } = X.decodeInfo(info), pid = X.poolId(key), salt = '0x' + BigInt(ids[i]).toString(16).padStart(64, '0');
+    const [slot, inside, pos] = await multicall([
+      { address: V.ADDR.stateView, abi: X.SV_ABI, functionName: 'getSlot0', args: [pid] },
+      { address: V.ADDR.stateView, abi: X.SV_ABI, functionName: 'getFeeGrowthInside', args: [pid, tickLower, tickUpper] },
+      { address: V.ADDR.stateView, abi: X.SV_ABI, functionName: 'getPositionInfo', args: [pid, V.ADDR.positionManager, tickLower, tickUpper, salt] }
+    ]);
+    const sqrtP = slot.result ? slot.result[0] : 0n, now = V.amountsOut(sqrtP, V.sqrtAtTick(tickLower), V.sqrtAtTick(tickUpper), L);
+    const fee0 = inside.result && pos.result ? X.owed(inside.result[0], pos.result[1], pos.result[0]) : 0n, fee1 = inside.result && pos.result ? X.owed(inside.result[1], pos.result[2], pos.result[0]) : 0n;
+    const c = COINS.find(x => x.addr.toLowerCase() === key.currency1.toLowerCase()) || { t: W.short(key.currency1), usd: 0 };
+    const tier = Number(key.fee) === 10000 ? '1.00% wild' : (Number(key.fee) / 10000).toFixed(2) + '%';
+    const feeUsd = Number(formatEther(fee0)) * ST.eth + Number(formatEther(fee1)) * (c.usd || 0);
+    cards.push({ id: ids[i], key, L, now, c, tier, fee0, fee1, feeUsd, html: `<div class="pcard" data-id="${ids[i]}"><div class="top"><div class="mono">${esc(c.t.slice(0, 3))}</div><div><b>${esc(c.t)}/ETH</b><span>#${ids[i]} · ${tier}</span></div><span class="tag">${L > 0n ? 'live' : 'empty'}</span></div><div class="earned">${usd(feeUsd)}<small>uncollected · ${fmt(formatEther(fee0), 6)} ETH + ${fmt(formatEther(fee1), 4)} ${esc(c.t)}</small></div><div class="rows" style="margin:0"><div><span>In the pool now</span><b>${fmt(formatEther(now.amount0), 5)} ETH + ${fmt(formatEther(now.amount1), 4)} ${esc(c.t)}</b></div></div><div class="acts"><button class="btn honey" data-a="collect">Collect</button><button class="btn" data-a="withdraw">Withdraw</button><a class="btn" href="${W.explorer('token', V.ADDR.positionManager)}?a=${ids[i]}" target="_blank" rel="noopener">NFT ↗</a></div></div>` });
   }
-  addEventListener('resize', size); size(); requestAnimationFrame(frame);
-  document.querySelector('.stage').addEventListener('click', function(){ drip(.6); });
+  ST.cards = cards;
+  el.innerHTML = cards.map(x => x.html).join('') || '<div class="empty">These positions are no longer in this wallet.</div>';
+}
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+$('pos').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-a]'); if (!b) return;
+  const card = ST.cards.find(x => x.id === b.closest('.pcard').dataset.id); if (!card) return;
+  try {
+    if (!ST.w.onChain) await W.switchChain();
+    b.disabled = true;
+    const data = b.dataset.a === 'collect'
+      ? X.collectCalldata({ tokenId: BigInt(card.id), key: card.key, recipient: ST.w.address })
+      : X.withdrawCalldata({ tokenId: BigInt(card.id), key: card.key, recipient: ST.w.address, amount0Min: card.now.amount0 * 99n / 100n, amount1Min: card.now.amount1 * 99n / 100n });
+    const tx = await W.sendRaw({ to: V.ADDR.positionManager, data });
+    toast((b.dataset.a === 'collect' ? 'Collecting' : 'Withdrawing') + ' · ' + txa(tx.hash), false, 60000);
+    const rc = await tx.wait(); if (rc.status !== 'success') throw Error('Reverted.');
+    toast((b.dataset.a === 'collect' ? 'Collected' : 'Withdrawn') + ' · ' + txa(tx.hash), false, 6000); drip(b.dataset.a === 'collect' ? .6 : .3);
+    loadPositions();
+  } catch (err) { toast(walletError(err), true, 7000); }
+  finally { b.disabled = false; }
+});
+$('pRefresh').onclick = () => loadPositions();
+$('pAdd').onclick = async () => {
+  const id = $('pAddId').value.trim(); if (!/^\d+$/.test(id)) return toast('Enter a numeric position id.', true);
+  const j = await fetch('/api/positions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id }) }).then(r => r.json()).catch(() => ({ error: 'Server is not reachable.' }));
+  if (j.error) return toast(esc(j.error), true);
+  if (ST.w.address && j.owner.toLowerCase() !== ST.w.address.toLowerCase()) toast('Position #' + id + ' belongs to ' + W.short(j.owner) + ', not this wallet.', true); else toast('Position #' + id + ' added.');
+  $('pAddId').value = ''; loadPositions();
+};
+
+/* wallet */
+function paintWallet() {
+  const s = ST.w, b = $('walletBtn');
+  if (!s.address) { b.textContent = 'Connect wallet'; b.className = 'btn'; }
+  else if (!s.onChain) { b.textContent = 'Switch to Robinhood'; b.className = 'btn honey'; }
+  else { b.innerHTML = '<i class="dot"></i> ' + W.short(s.address); b.className = 'btn'; W.pub.getBalance({ address: s.address }).then(v => { $('fEthBal').textContent = 'balance ' + fmt(formatEther(v), 4) + ' ETH'; }).catch(() => {}); }
+}
+function openWallets() {
+  const list = W.wallets();
+  $('wlist').innerHTML = list.length ? list.map(w => `<button class="wbtn" data-id="${esc(w.id)}">${w.icon ? `<img src="${esc(w.icon)}" alt="">` : '<i class="dot"></i>'}${esc(w.name)}</button>`).join('') : '<p class="note">No wallet in this browser. Install MetaMask or Rabby, or open Rouri in your wallet app browser.</p>';
+  $('wm').classList.add('on');
+}
+$('walletBtn').onclick = async () => { const s = ST.w; if (s.address && !s.onChain) { try { await W.switchChain(); } catch (e) { toast(walletError(e), true); } return; } if (s.address) { if (confirm('Disconnect ' + W.short(s.address) + '?')) W.disconnect(); return; } openWallets(); };
+$('wmX').onclick = () => $('wm').classList.remove('on');
+$('wm').onclick = e => { if (e.target === $('wm')) $('wm').classList.remove('on'); };
+$('wlist').onclick = async e => { const b = e.target.closest('.wbtn'); if (!b) return; try { await W.connect(b.dataset.id); $('wm').classList.remove('on'); } catch (err) { toast(walletError(err), true); } };
+W.onChange(s => { ST.w = s; paintWallet(); quote(); loadPositions(); });
+
+/* boot */
+paintWallet();
+(async () => {
+  await ethPrice();
+  try { await readPools(COINS); } catch (e) { $('tb').innerHTML = '<tr><td colspan="6" style="color:var(--dn)">Could not read pools from Robinhood Chain. Refresh in a moment.</td></tr>'; }
+  paintPools();
+  const nv = COINS[0]; if (nv && ST.pools[nv.addr + ':standard'] && ST.pools[nv.addr + ':standard'].broken) setTier('wild');
+  quote();
 })();
+W.restore().then(s => { ST.w = s; paintWallet(); quote(); loadPositions(); });
+setInterval(() => { if (!document.hidden) ethPrice(); }, 60000);
+
+/* the pour: honey stream into a pool */
+const cv = $('stream'), ctx = cv.getContext('2d');
+let dpr = 1, Wd = 0, H = 0, boost = 0, ripples = [], drops = [], lastT = performance.now(), rip = 0, level = 0;
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function drip(n) { boost = Math.min(1.4, boost + n); level = Math.min(1, level + n * .08); }
+function size() { dpr = Math.min(devicePixelRatio || 1, 2); Wd = cv.clientWidth || 500; H = cv.clientHeight || 500; cv.width = Math.round(Wd * dpr); cv.height = Math.round(H * dpr); }
+function frame(now) {
+  let dt = Math.min(.05, (now - lastT) / 1000); lastT = now; if (RM) dt *= .3;
+  const t = now / 1000, cx = Wd * .5, py = H * (.78 - level * .04), rx = Math.min(Wd * .42, 260), ry = rx * .2;
+  boost = Math.max(0, boost - dt * .35);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, Wd, H);
+  ctx.fillStyle = 'rgba(80,45,10,.12)'; ctx.beginPath(); ctx.ellipse(cx, py + ry * .9, rx * 1.04, ry * .7, 0, 0, 6.283); ctx.fill();
+  const pg = ctx.createRadialGradient(cx - rx * .25, py - ry * .4, 4, cx, py, rx); pg.addColorStop(0, '#fff0c9'); pg.addColorStop(.25, '#f2b84b'); pg.addColorStop(.8, '#d98410'); pg.addColorStop(1, '#9c5406');
+  ctx.fillStyle = pg; ctx.beginPath(); ctx.ellipse(cx, py, rx, ry, 0, 0, 6.283); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,244,220,.55)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(cx, py, rx, ry, 0, 3.3, 5.9); ctx.stroke();
+  rip -= dt; if (rip <= 0) { ripples.push({ r: .06, a: .7 }); rip = .55 - boost * .25; }
+  for (let i = ripples.length - 1; i >= 0; i--) { const R = ripples[i]; R.r += dt * (.32 + boost * .2); R.a -= dt * .55; if (R.a <= 0 || R.r > .98) { ripples.splice(i, 1); continue; }
+    ctx.strokeStyle = 'rgba(255,245,222,' + (R.a * .8).toFixed(3) + ')'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.ellipse(cx, py, rx * R.r, ry * R.r, 0, 0, 6.283); ctx.stroke(); }
+  const w0 = 7 + boost * 9 + Math.sin(t * 3.1) * .8, stepsN = 40, Lp = [], Rp = [];
+  for (let s = 0; s <= stepsN; s++) { const y = -10 + (py + 10) * s / stepsN, k = s / stepsN, wob = Math.sin(y * .02 - t * 5) * (1.2 + boost) * k, w = w0 * (.55 + .45 * k); Lp.push([cx + wob - w / 2, y]); Rp.unshift([cx + wob + w / 2, y]); }
+  const sg = ctx.createLinearGradient(cx - w0, 0, cx + w0, 0); sg.addColorStop(0, '#a95c08'); sg.addColorStop(.35, '#f7c867'); sg.addColorStop(.55, '#fff0c9'); sg.addColorStop(1, '#b8680c');
+  ctx.fillStyle = sg; ctx.beginPath(); Lp.concat(Rp).forEach((q, j) => j ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,240,201,.9)'; ctx.beginPath(); ctx.ellipse(cx, py, w0 * 1.3, w0 * .35, 0, 0, 6.283); ctx.fill();
+  if (Math.random() < dt * (3 + boost * 30)) for (let n = 0; n < 1 + Math.floor(boost * 3); n++) drops.push({ x: cx + (Math.random() - .5) * w0, y: py, vx: (Math.random() - .5) * 70, vy: -60 - Math.random() * 90 * (1 + boost), r: 1.4 + Math.random() * 2.2 });
+  for (let d = drops.length - 1; d >= 0; d--) { const D = drops[d]; D.vy += 320 * dt; D.x += D.vx * dt; D.y += D.vy * dt; if (D.y > py && D.vy > 0) { drops.splice(d, 1); continue; }
+    ctx.fillStyle = '#e3931b'; ctx.beginPath(); ctx.arc(D.x, D.y, D.r, 0, 6.283); ctx.fill(); ctx.fillStyle = 'rgba(255,243,214,.9)'; ctx.beginPath(); ctx.arc(D.x - D.r * .3, D.y - D.r * .3, D.r * .35, 0, 6.283); ctx.fill(); }
+  requestAnimationFrame(frame);
+}
+addEventListener('resize', size); size(); requestAnimationFrame(frame);
+document.querySelector('.stage').addEventListener('click', () => drip(.6));
 </script>
 </body>
 </html>
